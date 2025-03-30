@@ -1,8 +1,12 @@
+import dispatcher.MessageDispatcher;
+import dispatcher.PeerMessenger;
+import handler.HelloHandler;
+import model.Action;
+import model.Peer;
 import screens.navigation.Navigation;
 import screens.navigation.Route;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -21,33 +25,42 @@ public class Main {
         String neighboursPath = args[1];
         String sharedDir = args[2];
 
-        Server server = new Server(address.getPort(), 0);
+        Peer rootPeer = new Peer(address);
 
-        List<InetSocketAddress> neighboursAddresses;
+        List<Peer> neighbourPeers;
         try {
-            neighboursAddresses = loadAddressesFromFile(neighboursPath);
+            neighbourPeers = loadPeersFromFile(neighboursPath);
         } catch (IOException e) {
             System.err.println("Erro ao ler arquivo de vizinhos: " + e.getMessage());
             return;
         }
 
-        neighboursAddresses.forEach(neighbour -> {
+        neighbourPeers.forEach(peer -> {
+            InetSocketAddress peerSocketAddress = peer.getSocketAddress();
             System.out.println(
                     "Adicionando novo peer "
-                    + neighbour.getHostString() + ":"
-                    + neighbour.getPort() + " "
+                    + peerSocketAddress.getHostString() + ":"
+                    + peerSocketAddress.getPort() + " "
                     + "status OFFLINE"
             );
         });
 
-        Navigation navigation = new Navigation();
+        rootPeer.setNeighbours(neighbourPeers);
+
+        MessageDispatcher dispatcher = new MessageDispatcher();
+        dispatcher.register(Action.HELLO, new HelloHandler(rootPeer));
+        rootPeer.setDispatcher(dispatcher);
+
+        PeerMessenger messenger = new PeerMessenger(rootPeer);
+        rootPeer.setMessenger(messenger);
+
+
+        Navigation navigation = new Navigation(rootPeer, neighbourPeers, sharedDir);
         navigation.navigate(Route.INITIAL);
-
-
     }
 
-    public static List<InetSocketAddress> loadAddressesFromFile(String filePath) throws IOException {
-        List<InetSocketAddress> addresses = new ArrayList<>();
+    public static List<Peer> loadPeersFromFile(String filePath) throws IOException {
+        List<Peer> peers = new ArrayList<>();
 
         List<String> lines = Files.readAllLines(Path.of(filePath));
 
@@ -58,12 +71,12 @@ public class Main {
 
             try {
                 int port = Integer.parseInt(address[1]);
-                addresses.add(new InetSocketAddress(address[0], port));
+                peers.add(new Peer(new InetSocketAddress(address[0], port)));
             } catch (NumberFormatException e) {
                 System.err.println("Porta inválida na linha: " + line);
             }
         }
 
-        return addresses;
+        return peers;
     }
 }

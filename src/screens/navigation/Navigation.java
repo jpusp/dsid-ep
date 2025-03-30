@@ -1,10 +1,24 @@
 package screens.navigation;
 
+import handler.FileHandler;
+import model.Peer;
 import screens.DisplayPeersScreen;
 import screens.InitialScreen;
 import screens.Screen;
 
+import java.util.List;
+
 public class Navigation {
+
+    private final Peer rootPeer;
+    private final List<Peer> neighboursPeers;
+    private final String sharedDir;
+
+    public Navigation(Peer rootPeer, List<Peer> neighboursPeers, String sharedDir) {
+        this.rootPeer = rootPeer;
+        this.neighboursPeers = neighboursPeers;
+        this.sharedDir = sharedDir;
+    }
 
     public void navigate(Route route) {
         switch (route) {
@@ -12,12 +26,13 @@ public class Navigation {
                 navigateToScreen(new InitialScreen(this));
             }
             case DISPLAY_PEERS -> {
-                navigateToScreen(new DisplayPeersScreen(this));
+                navigateToScreen(new DisplayPeersScreen(this, rootPeer, neighboursPeers));
             }
             case GET_PEERS -> {
                 System.out.println("Obtendo peers...");
             }
             case DISPLAY_FILES -> {
+                FileHandler.listLocalFiles(sharedDir);
                 System.out.println("Listando arquivos locais...");
             }
             case SEARCH_FILES -> {
