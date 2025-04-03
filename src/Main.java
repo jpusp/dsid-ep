@@ -1,6 +1,7 @@
 import dispatcher.MessageDispatcher;
 import dispatcher.PeerMessenger;
 import handler.HelloHandler;
+import handler.PeerListHandler;
 import model.Action;
 import model.Peer;
 import screens.navigation.Navigation;
@@ -49,11 +50,14 @@ public class Main {
 
         MessageDispatcher dispatcher = new MessageDispatcher();
         dispatcher.register(Action.HELLO, new HelloHandler(rootPeer));
+        dispatcher.register(Action.LIST_PEERS, new PeerListHandler(rootPeer));
+
         rootPeer.setDispatcher(dispatcher);
 
         PeerMessenger messenger = new PeerMessenger(rootPeer);
         rootPeer.setMessenger(messenger);
 
+        rootPeer.startServer();
 
         Navigation navigation = new Navigation(rootPeer, neighbourPeers, sharedDir);
         navigation.navigate(Route.INITIAL);

@@ -2,6 +2,7 @@ package model;
 
 public enum Action {
     HELLO("HELLO"),
+    LIST_PEERS("LIST_PEERS"),
     GET_PEERS("GET_PEERS"),
     BYE("BYE");
 
