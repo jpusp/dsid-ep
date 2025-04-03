@@ -1,5 +1,6 @@
+import handler.ByeHandler;
+import handler.GetPeersHandler;
 import dispatcher.MessageDispatcher;
-import dispatcher.PeerMessenger;
 import handler.HelloHandler;
 import handler.PeerListHandler;
 import model.Action;
@@ -7,6 +8,7 @@ import model.Peer;
 import screens.navigation.Navigation;
 import screens.navigation.Route;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.file.Files;
@@ -26,11 +28,10 @@ public class Main {
         String neighboursPath = args[1];
         String sharedDir = args[2];
 
-        Peer rootPeer = new Peer(address);
-
-        List<Peer> neighbourPeers;
+        MessageDispatcher dispatcher = new MessageDispatcher();
+        ArrayList<Peer> neighbourPeers;
         try {
-            neighbourPeers = loadPeersFromFile(neighboursPath);
+            neighbourPeers = loadPeersFromFile(neighboursPath, dispatcher);
         } catch (IOException e) {
             System.err.println("Erro ao ler arquivo de vizinhos: " + e.getMessage());
             return;
@@ -46,25 +47,31 @@ public class Main {
             );
         });
 
-        rootPeer.setNeighbours(neighbourPeers);
+        Peer rootPeer = new Peer(address, dispatcher, neighbourPeers);
+        Navigation navigation = new Navigation(rootPeer, neighbourPeers, sharedDir);
 
-        MessageDispatcher dispatcher = new MessageDispatcher();
         dispatcher.register(Action.HELLO, new HelloHandler(rootPeer));
         dispatcher.register(Action.LIST_PEERS, new PeerListHandler(rootPeer));
+        dispatcher.register(Action.GET_PEERS, new GetPeersHandler(rootPeer));
+        dispatcher.register(Action.BYE, new ByeHandler(rootPeer));
 
-        rootPeer.setDispatcher(dispatcher);
-
-        PeerMessenger messenger = new PeerMessenger(rootPeer);
-        rootPeer.setMessenger(messenger);
-
-        rootPeer.startServer();
-
-        Navigation navigation = new Navigation(rootPeer, neighbourPeers, sharedDir);
-        navigation.navigate(Route.INITIAL);
+        if (isPathValid(sharedDir)) {
+            rootPeer.startServer();
+            navigation.navigate(Route.INITIAL);
+        }
     }
 
-    public static List<Peer> loadPeersFromFile(String filePath) throws IOException {
-        List<Peer> peers = new ArrayList<>();
+    private static boolean isPathValid(String path) {
+        File directory = new File(path);
+        if (!directory.exists() || !directory.isDirectory() || !directory.canRead()) {
+            System.err.println("Diretório inválido ou sem permissão de leitura: " + path);
+            return false;
+        } else return true;
+
+    }
+
+    public static ArrayList<Peer> loadPeersFromFile(String filePath, MessageDispatcher dispatcher) throws IOException {
+        ArrayList<Peer> peers = new ArrayList<>();
 
         List<String> lines = Files.readAllLines(Path.of(filePath));
 
@@ -75,7 +82,7 @@ public class Main {
 
             try {
                 int port = Integer.parseInt(address[1]);
-                peers.add(new Peer(new InetSocketAddress(address[0], port)));
+                peers.add(new Peer(new InetSocketAddress(address[0], port), dispatcher));
             } catch (NumberFormatException e) {
                 System.err.println("Porta inválida na linha: " + line);
             }

@@ -19,20 +19,29 @@ public class Peer {
     private volatile boolean running = true;
     private PeerStatus status = PeerStatus.OFFLINE;
     private int clock = 0;
-    private final List<Peer> neighbours = new ArrayList<>();
-    private MessageDispatcher dispatcher;
-    private PeerMessenger messenger;
+    private final ArrayList<Peer> neighbours;
+    private final MessageDispatcher dispatcher;
 
-
-    public Peer(InetSocketAddress socketAddress) {
+    public Peer(InetSocketAddress socketAddress, MessageDispatcher dispatcher) {
         this.socketAddress = socketAddress;
+        this.dispatcher = dispatcher;
+        this.neighbours = new ArrayList<>();
+    }
+
+    public Peer(
+            InetSocketAddress socketAddress,
+            MessageDispatcher dispatcher,
+            ArrayList<Peer> neighbours
+    ) {
+        this.socketAddress = socketAddress;
+        this.dispatcher = dispatcher;
+        this.neighbours = neighbours;
     }
 
     public void startServer() {
         new Thread(() -> {
             try {
                 serverSocket = new ServerSocket(socketAddress.getPort(), 50, socketAddress.getAddress());
-                System.out.println("Peer listening at " + socketAddress.getHostString() + ":" + socketAddress.getPort());
 
                 while (running) {
                     Socket socket = serverSocket.accept();
@@ -57,10 +66,6 @@ public class Peer {
         }
     }
 
-    public void broadcastMessage(String message) {
-        connections.forEach(connection -> connection.sendMessage(message));
-    }
-
     public void stop() {
         running = false;
         connections.forEach(PeerConnection::disconnect);
@@ -71,21 +76,16 @@ public class Peer {
         }
     }
 
-    public void setNeighbours(List<Peer> neighboursList) {
-        neighbours.clear();
-        neighbours.addAll(neighboursList);
+    public MessageDispatcher getDispatcher() {
+        return dispatcher;
+    }
+
+    public List<Peer> getNeighbours() {
+        return neighbours;
     }
 
     public void addNeighbour(Peer peer) {
         neighbours.add(peer);
-    }
-
-    public void setDispatcher(MessageDispatcher dispatcher) {
-        this.dispatcher = dispatcher;
-    }
-
-    public void setMessenger(PeerMessenger messenger) {
-        this.messenger = messenger;
     }
 
     public Peer findPeerByAddress(InetSocketAddress address) {
@@ -108,10 +108,6 @@ public class Peer {
         System.out.println("=> Atualizando relogio para " + clock);
     }
 
-    public void sendHelloTo(Peer targetPeer) {
-        messenger.sendMessageToPeer(Action.HELLO, targetPeer);
-    }
-
     public PeerStatus getStatus() {
         return status;
     }
@@ -126,6 +122,12 @@ public class Peer {
 
     public String getAddressString() {
         return socketAddress.getHostString() + ":" + socketAddress.getPort();
+    }
+
+    public void shutdown() {
+        for (Peer peer : neighbours) {
+            PeerMessenger.sendMessageToPeer(Action.BYE, this, peer);
+        }
     }
 
     @Override

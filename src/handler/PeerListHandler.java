@@ -2,6 +2,8 @@ package handler;
 
 import model.Peer;
 import model.PeerStatus;
+import screens.navigation.Navigation;
+import screens.navigation.Route;
 
 import java.net.InetSocketAddress;
 
@@ -51,7 +53,7 @@ public class PeerListHandler implements MessageHandler {
                 existingPeer.setStatus(status);
                 System.out.println("Atualizando peer " + ip + ":" + port + " status " + status);
             } else {
-                Peer newPeer = new Peer(address);
+                Peer newPeer = new Peer(address, localPeer.getDispatcher());
                 newPeer.setStatus(status);
                 localPeer.addNeighbour(newPeer);
                 System.out.println("Adicionando novo peer " + ip + ":" + port + " status " + status);

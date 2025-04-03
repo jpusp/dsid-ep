@@ -7,6 +7,7 @@ import java.util.Scanner;
 
 public abstract class AbstractScreen implements Screen {
     protected final Navigation navigation;
+    private Scanner scanner = new Scanner(System.in);
 
     protected AbstractScreen(Navigation navigation) {
         this.navigation = navigation;
@@ -18,8 +19,8 @@ public abstract class AbstractScreen implements Screen {
         showOptions();
         System.out.print(">");
 
-        Scanner scanner = new Scanner(System.in);
-        int option = scanner.nextInt();
+        String entrada = scanner.nextLine();
+        int option = Integer.parseInt(entrada);
         onOptionSelected(option);
     }
 

@@ -2,6 +2,8 @@ package handler;
 
 import model.Peer;
 import model.PeerStatus;
+import screens.navigation.Navigation;
+import screens.navigation.Route;
 
 import java.net.InetSocketAddress;
 
@@ -29,7 +31,7 @@ public class HelloHandler implements MessageHandler {
                 existing.setStatus(PeerStatus.ONLINE);
                 System.out.println("Atualizando peer " + sender + " status ONLINE");
             } else {
-                Peer newPeer = new Peer(address);
+                Peer newPeer = new Peer(address, localPeer.getDispatcher());
                 newPeer.setStatus(PeerStatus.ONLINE);
                 localPeer.addNeighbour(newPeer);
                 System.out.println("Adicionando novo peer " + sender + " status ONLINE");

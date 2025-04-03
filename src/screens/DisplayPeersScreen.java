@@ -1,20 +1,21 @@
 package screens;
 
+import dispatcher.PeerMessenger;
+import model.Action;
 import model.Peer;
 import screens.navigation.Navigation;
 import screens.navigation.Route;
 
 import java.util.List;
-import java.util.Scanner;
 
 public class DisplayPeersScreen extends AbstractScreen {
 
-    private final Peer rootPeer;
+    private final Peer localPeer;
     private final List<Peer> neighboursPeers;
 
-    public DisplayPeersScreen(Navigation navigation, Peer rootPeer, List<Peer> neighboursPeers) {
+    public DisplayPeersScreen(Navigation navigation, Peer localPeer, List<Peer> neighboursPeers) {
         super(navigation);
-        this.rootPeer = rootPeer;
+        this.localPeer = localPeer;
         this.neighboursPeers = neighboursPeers;
     }
 
@@ -36,7 +37,7 @@ public class DisplayPeersScreen extends AbstractScreen {
             int index = option - 1;
             if (index >= 0 && index < neighboursPeers.size()) {
                 Peer selectedPeer = neighboursPeers.get(index);
-                rootPeer.sendHelloTo(selectedPeer);
+                PeerMessenger.sendMessageToPeer(Action.HELLO, localPeer, selectedPeer);
             }
             navigation.navigate(Route.DISPLAY_PEERS);
         }

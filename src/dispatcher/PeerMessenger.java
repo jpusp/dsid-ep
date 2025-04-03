@@ -11,13 +11,12 @@ import java.net.Socket;
 
 public class PeerMessenger {
 
-    private final Peer localPeer;
-
-    public PeerMessenger(Peer localPeer) {
-        this.localPeer = localPeer;
-    }
-
-    public void sendMessageToPeer(Action action, Peer targetPeer, String... args) {
+    public static void sendMessageToPeer(
+            Action action,
+            Peer localPeer,
+            Peer targetPeer,
+            String... args
+    ) {
         InetSocketAddress addr = targetPeer.getSocketAddress();
         int clockValue = localPeer.incrementClock();
 

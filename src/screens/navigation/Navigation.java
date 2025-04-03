@@ -1,10 +1,12 @@
 package screens.navigation;
 
+import dispatcher.PeerMessenger;
 import handler.FileHandler;
+import model.Action;
 import model.Peer;
+import screens.AbstractScreen;
 import screens.DisplayPeersScreen;
 import screens.InitialScreen;
-import screens.Screen;
 
 import java.util.List;
 
@@ -29,11 +31,15 @@ public class Navigation {
                 navigateToScreen(new DisplayPeersScreen(this, rootPeer, neighboursPeers));
             }
             case GET_PEERS -> {
-                System.out.println("Obtendo peers...");
+                for (Peer peer : neighboursPeers) {
+                    PeerMessenger.sendMessageToPeer(Action.GET_PEERS, rootPeer, peer);
+                }
+
+                navigate(Route.INITIAL);
             }
             case DISPLAY_FILES -> {
                 FileHandler.listLocalFiles(sharedDir);
-                System.out.println("Listando arquivos locais...");
+                navigate(Route.INITIAL);
             }
             case SEARCH_FILES -> {
                 System.out.println("Buscando arquivos...");
@@ -45,17 +51,16 @@ public class Navigation {
                 System.out.println("Alterando tamanho de chunk...");
             }
             case EXIT -> {
-                System.out.println("Saindo...");
+                rootPeer.shutdown();
                 System.exit(0);
             }
             default -> {
                 System.out.println("Comando inválido.");
             }
         }
-
     }
 
-    private void navigateToScreen(Screen screen) {
+    private void navigateToScreen(AbstractScreen screen) {
         screen.display();
     }
 }
