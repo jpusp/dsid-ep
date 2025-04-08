@@ -1,0 +1,39 @@
+#!/bin/bash
+
+clear
+
+if [ "$#" -lt 3 ]; then
+  echo "Uso: ./eachare <endereco:porta> <vizinhos.txt> <diretorio_compartilhado>"
+  exit 1
+fi
+
+ENDERECO_PORTA=$1
+VIZINHOS=$2
+DIRETORIO=$3
+
+DIR="$(cd "$(dirname "$0")" && pwd)"
+BUILD_DIR="$DIR/build"
+
+# Corrige caminhos relativos para absolutos
+if [[ "$DIRETORIO" != /* ]]; then
+  DIRETORIO="$DIR/$DIRETORIO"
+fi
+
+if [[ "$VIZINHOS" != /* ]]; then
+  VIZINHOS="$DIR/$VIZINHOS"
+fi
+
+# Limpa e recompila
+rm -rf "$BUILD_DIR"
+mkdir -p "$BUILD_DIR"
+
+find "$DIR" -name "*.java" > "$BUILD_DIR/sources.txt"
+javac -d "$BUILD_DIR" @"$BUILD_DIR/sources.txt"
+
+if [ $? -ne 0 ]; then
+  echo "Erro na compilação!"
+  exit 1
+fi
+
+cd "$BUILD_DIR"
+java Main "$ENDERECO_PORTA" "$VIZINHOS" "$DIRETORIO"

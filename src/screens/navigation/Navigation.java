@@ -24,41 +24,49 @@ public class Navigation {
 
     public void navigate(Route route) {
         switch (route) {
-            case INITIAL -> {
+            case INITIAL:
                 navigateToScreen(new InitialScreen(this));
-            }
-            case DISPLAY_PEERS -> {
+                break;
+
+            case DISPLAY_PEERS:
                 navigateToScreen(new DisplayPeersScreen(this, rootPeer, neighboursPeers));
-            }
-            case GET_PEERS -> {
+                break;
+
+            case GET_PEERS:
                 for (Peer peer : neighboursPeers) {
                     PeerMessenger.sendMessageToPeer(Action.GET_PEERS, rootPeer, peer);
                 }
-
                 navigate(Route.INITIAL);
-            }
-            case DISPLAY_FILES -> {
+                break;
+
+            case DISPLAY_FILES:
                 FileHandler.listLocalFiles(sharedDir);
                 navigate(Route.INITIAL);
-            }
-            case SEARCH_FILES -> {
+                break;
+
+            case SEARCH_FILES:
                 System.out.println("Buscando arquivos...");
-            }
-            case SHOW_STATS -> {
+                break;
+
+            case SHOW_STATS:
                 System.out.println("Exibindo estatísticas...");
-            }
-            case CHANGE_CHUNK -> {
+                break;
+
+            case CHANGE_CHUNK:
                 System.out.println("Alterando tamanho de chunk...");
-            }
-            case EXIT -> {
+                break;
+
+            case EXIT:
                 rootPeer.shutdown();
                 System.exit(0);
-            }
-            default -> {
+                break;
+
+            default:
                 System.out.println("Comando inválido.");
-            }
+                break;
         }
     }
+
 
     private void navigateToScreen(AbstractScreen screen) {
         screen.display();
