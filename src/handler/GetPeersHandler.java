@@ -19,7 +19,8 @@ public class GetPeersHandler implements MessageHandler {
 
     @Override
     public void handle(String sender, int clock, String[] args) {
-        localPeer.updateClockOnReceive();
+        localPeer.updateClockOnReceive(clock, true);
+        localPeer.incrementClock();
 
         String[] parts = sender.split(":");
         if (parts.length != 2) {
@@ -41,8 +42,12 @@ public class GetPeersHandler implements MessageHandler {
             localPeer.addNeighbour(senderPeer);
             System.out.println("Adicionando novo peer " + sender + " status ONLINE");
         }
-        senderPeer.setStatus(PeerStatus.ONLINE);
-        System.out.println("Atualizando peer " + sender + " status ONLINE");
+
+        if (clock > senderPeer.getClock()) {
+            senderPeer.setStatus(PeerStatus.ONLINE);
+            System.out.println("Atualizando peer " + sender + " status ONLINE");
+            senderPeer.updateClockOnReceive(clock, false);
+        }
 
         List<Peer> knownPeers = localPeer.getNeighbours();
         List<String> msgArgs = new ArrayList<>();
@@ -59,7 +64,7 @@ public class GetPeersHandler implements MessageHandler {
             if (p.getSocketAddress().equals(address)) {
                 continue;
             }
-            msgArgs.add(p.getAddressString() + ":" + p.getStatus() + ":0");
+            msgArgs.add(p.getAddressString() + ":" + p.getStatus() + ":" + p.getClock());
         }
 
         String[] finalArgs = msgArgs.toArray(new String[0]);

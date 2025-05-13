@@ -108,6 +108,17 @@ public class Peer {
         System.out.println("=> Atualizando relogio para " + clock);
     }
 
+    public synchronized int getClock() {
+        return clock;
+    }
+
+    public synchronized void updateClockOnReceive(int clockReceived, boolean verbose) {
+        if (clockReceived > clock) {
+            clock = clockReceived;
+            if (verbose) System.out.println("=> Atualizando relogio para " + clock);
+        }
+    }
+
     public PeerStatus getStatus() {
         return status;
     }
