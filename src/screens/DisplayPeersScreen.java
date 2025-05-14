@@ -25,7 +25,7 @@ public class DisplayPeersScreen extends AbstractScreen {
         System.out.println("\t[0] Voltar para o menu anterior");
 
         for (int i = 0; i < neighboursPeers.size(); i++) {
-            System.out.println("\t[" + (i + 1) + "] " + neighboursPeers.get(i).toString());
+            System.out.println("\t[" + (i + 1) + "] " + neighboursPeers.get(i).toString() + " " + neighboursPeers.get(i).getClock());
         }
     }
 

@@ -1,0 +1,70 @@
+package screens;
+
+import dispatcher.PeerMessageErrorCallback;
+import dispatcher.PeerMessenger;
+import model.Action;
+import model.Peer;
+import model.SharableFile;
+import model.SharedFileListManager;
+import screens.navigation.Navigation;
+import screens.navigation.Route;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class FileListScreen extends AbstractScreen implements PeerMessageErrorCallback {
+
+    private final Peer localPeer;
+    private final SharedFileListManager sharedFileListManager;
+
+    public FileListScreen(Navigation navigation, Peer localPeer, SharedFileListManager sharedFileListManager) {
+        super(navigation);
+        this.localPeer = localPeer;
+        this.sharedFileListManager = sharedFileListManager;
+    }
+
+    @Override
+    protected void showOptions() {
+        System.out.println("DEBUG FILE LIST SCREEN");
+        sharedFileListManager.startNewRequest(localPeer.getNeighbours().size());
+
+        List<Peer> neighboursPeers = this.localPeer.getNeighbours();
+        for (Peer peer : neighboursPeers) {
+            PeerMessenger.sendMessageToPeer(Action.LIST_FILES, localPeer, peer, this);
+        }
+
+        synchronized (sharedFileListManager.lock) {
+            while (sharedFileListManager.getRemainingPeers() > 0) {
+                try {
+                    System.out.println("Carregando arquivos...");
+                    sharedFileListManager.lock.wait();
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            System.out.println("Arquivos encontrados na rede:");
+            System.out.println("\t[0] Voltar para o menu anterior");
+            System.out.println("\tNome \t\t\t\t | Tamanho \t | Peer");
+
+            List<SharableFile> files = sharedFileListManager.getFiles();
+            for (int i = 0; i < files.size(); i++) {
+                System.out.println("\t[" + (i + 1) + "] " + files.get(i).getName() + "\t\t " +  files.get(i).getSize() + "\t" + files.get(i).getPeer());
+            }
+        }
+    }
+
+    @Override
+    protected void onOptionSelected(int option) {
+        if (option == 0) {
+            navigation.navigate(Route.INITIAL);
+        } else {
+            int index = option - 1;
+            System.out.println("SELECTED " + index);
+        }
+    }
+
+    @Override
+    public void onMessageError() {
+        sharedFileListManager.decrementRemainingPeers();
+    }
+}

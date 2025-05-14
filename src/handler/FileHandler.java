@@ -4,7 +4,12 @@ import java.io.File;
 
 public class FileHandler {
 
-    public static void listLocalFiles(String sharedDirectory) {
+    public static File[] listLocalFiles(String sharedDirectory) {
+        File folder = new File(sharedDirectory);
+        return folder.listFiles();
+    }
+
+    public static void listAndPrintLocalFiles(String sharedDirectory) {
         File folder = new File(sharedDirectory);
 
         if (!folder.exists() || !folder.isDirectory() || !folder.canRead()) {

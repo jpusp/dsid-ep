@@ -9,5 +9,6 @@ public enum Route {
     SHOW_STATS,
     CHANGE_CHUNK,
     EXIT,
-    INVALID
+    INVALID,
+    FILE_LIST,
 }

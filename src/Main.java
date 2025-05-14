@@ -1,10 +1,8 @@
-import handler.ByeHandler;
-import handler.GetPeersHandler;
+import handler.*;
 import dispatcher.MessageDispatcher;
-import handler.HelloHandler;
-import handler.PeerListHandler;
 import model.Action;
 import model.Peer;
+import model.SharedFileListManager;
 import screens.navigation.Navigation;
 import screens.navigation.Route;
 
@@ -48,12 +46,15 @@ public class Main {
         });
 
         Peer rootPeer = new Peer(address, dispatcher, neighbourPeers);
-        Navigation navigation = new Navigation(rootPeer, neighbourPeers, sharedDir);
+        SharedFileListManager sharedFileListManager = new SharedFileListManager();
+        Navigation navigation = new Navigation(rootPeer, neighbourPeers, sharedDir, sharedFileListManager);
 
         dispatcher.register(Action.HELLO, new HelloHandler(rootPeer));
         dispatcher.register(Action.LIST_PEERS, new PeerListHandler(rootPeer));
         dispatcher.register(Action.GET_PEERS, new GetPeersHandler(rootPeer));
         dispatcher.register(Action.BYE, new ByeHandler(rootPeer));
+        dispatcher.register(Action.LIST_FILES, new ListFilesHandler(rootPeer, sharedDir));
+        dispatcher.register(Action.FILE_LIST, new FileListHandler(rootPeer, sharedFileListManager));
 
         if (isPathValid(sharedDir)) {
             rootPeer.startServer();

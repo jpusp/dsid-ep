@@ -4,7 +4,9 @@ public enum Action {
     HELLO("HELLO"),
     LIST_PEERS("LIST_PEERS"),
     GET_PEERS("GET_PEERS"),
-    BYE("BYE");
+    BYE("BYE"),
+    LIST_FILES("LS"),
+    FILE_LIST("LS_LIST");
 
     private final String value;
 
