@@ -55,6 +55,8 @@ public class Main {
         dispatcher.register(Action.BYE, new ByeHandler(rootPeer));
         dispatcher.register(Action.LIST_FILES, new ListFilesHandler(rootPeer, sharedDir));
         dispatcher.register(Action.FILE_LIST, new FileListHandler(rootPeer, sharedFileListManager));
+        dispatcher.register(Action.DOWNLOAD, new DownloadHandler(rootPeer, sharedDir));
+        dispatcher.register(Action.FILE, new FileReceiveHandler(rootPeer, sharedDir, sharedFileListManager));
 
         if (isPathValid(sharedDir)) {
             rootPeer.startServer();

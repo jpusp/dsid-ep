@@ -8,13 +8,12 @@ public class SharedFileListManager {
     public final Object lock = new Object();
     private final List<SharableFile> files = new ArrayList<>();
     private int remainingPeers = 0;
+    private SharableFile fileToDownload;
 
     public void addFilesFromPeer(List<SharableFile> files) {
         synchronized (lock) {
             this.files.addAll(files);
             remainingPeers =  remainingPeers - 1;
-            System.out.println("DEBUG SHARED FILE LIST MANAGER");
-            System.out.println("Remaining peers: " + remainingPeers);
             lock.notify();
         }
     }
@@ -39,4 +38,11 @@ public class SharedFileListManager {
         }
     }
 
+    public void setFileToDownload(SharableFile file) {
+        this.fileToDownload = file;
+    }
+
+    public SharableFile getFileToDownload() {
+        return fileToDownload;
+    }
 }

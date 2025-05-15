@@ -6,7 +6,9 @@ public enum Action {
     GET_PEERS("GET_PEERS"),
     BYE("BYE"),
     LIST_FILES("LS"),
-    FILE_LIST("LS_LIST");
+    FILE_LIST("LS_LIST"),
+    DOWNLOAD("DS"),
+    FILE("FILE");
 
     private final String value;
 

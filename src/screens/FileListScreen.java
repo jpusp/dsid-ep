@@ -59,7 +59,21 @@ public class FileListScreen extends AbstractScreen implements PeerMessageErrorCa
             navigation.navigate(Route.INITIAL);
         } else {
             int index = option - 1;
-            System.out.println("SELECTED " + index);
+            List<SharableFile> files = sharedFileListManager.getFiles();
+            if (index >= 0 && index < files.size()) {
+                SharableFile file = files.get(index);
+                System.out.println("SELECTED " + file.getName() + " " + file.getPeer());
+                Peer peerWithFile = localPeer.findPeerByAddress(file.getPeer());
+                sharedFileListManager.setFileToDownload(file);
+                PeerMessenger.sendMessageToPeer(
+                        Action.DOWNLOAD,
+                        localPeer, peerWithFile,
+                        file.getName(), "0", "0");
+                navigation.navigate(Route.INITIAL);
+            } else {
+                System.out.println("INVALID OPTION");
+            }
+
         }
     }
 
