@@ -17,6 +17,16 @@ public class PeerMessenger {
             Peer targetPeer,
             String... args
     ) {
+        sendMessageToPeer(action, localPeer, targetPeer, null, args);
+    }
+
+    public static void sendMessageToPeer(
+            Action action,
+            Peer localPeer,
+            Peer targetPeer,
+            PeerMessageErrorCallback errorCallback,
+            String... args
+    ) {
         InetSocketAddress addr = targetPeer.getSocketAddress();
         int clockValue = localPeer.incrementClock();
 
@@ -42,6 +52,7 @@ public class PeerMessenger {
             System.out.println("Atualizando peer " + targetPeer.getAddressString() + " status ONLINE");
 
         } catch (IOException e) {
+            if (errorCallback != null) errorCallback.onMessageError();
             targetPeer.setStatus(PeerStatus.OFFLINE);
             System.out.println("Atualizando peer " + targetPeer.getAddressString() + " status OFFLINE");
         }

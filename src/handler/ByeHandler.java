@@ -14,7 +14,8 @@ public class ByeHandler implements MessageHandler {
 
     @Override
     public void handle(String sender, int clock, String[] args) {
-        localPeer.updateClockOnReceive();
+        localPeer.updateClockOnReceive(clock, true);
+        localPeer.incrementClock();
 
         String[] parts = sender.split(":");
         if (parts.length != 2) return;
@@ -26,7 +27,9 @@ public class ByeHandler implements MessageHandler {
 
             Peer existingPeer = localPeer.findPeerByAddress(address);
             if (existingPeer != null) {
+                existingPeer.updateClockOnReceive(clock, false);
                 existingPeer.setStatus(PeerStatus.OFFLINE);
+
                 System.out.println("Atualizando peer " + sender + " status OFFLINE");
             }
         } catch (NumberFormatException ignored) {
