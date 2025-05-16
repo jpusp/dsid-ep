@@ -43,12 +43,16 @@ public class FileListScreen extends AbstractScreen implements PeerMessageErrorCa
                 }
             }
             System.out.println("Arquivos encontrados na rede:");
-            System.out.println("\t[0] Voltar para o menu anterior");
-            System.out.println("\tNome \t\t\t\t | Tamanho \t | Peer");
+            System.out.printf("%-4s %-60s %-10s %-15s\n", "","Nome", "Tamanho", "Peer");
+            System.out.println("[0]  Voltar para o menu anterior");
 
             List<SharableFile> files = sharedFileListManager.getFiles();
             for (int i = 0; i < files.size(); i++) {
-                System.out.println("\t[" + (i + 1) + "] " + files.get(i).getName() + "\t\t " +  files.get(i).getSize() + "\t" + files.get(i).getPeer());
+                String option = "[" + (i + 1) + "]";
+                String name = files.get(i).getName();
+                int size = files.get(i).getSize();
+                String address = files.get(i).getPeer();
+                System.out.printf("%-4s %-60s %-10d %-15s\n", option, name, size, address);
             }
         }
     }
