@@ -2,6 +2,7 @@ package handler;
 
 import dispatcher.PeerMessenger;
 import model.Action;
+import model.FileChunk;
 import model.Peer;
 import model.PeerStatus;
 
@@ -26,19 +27,18 @@ public class DownloadHandler implements MessageHandler {
         localPeer.incrementClock();
 
         Peer senderPeer = localPeer.findPeerByAddress(sender);
-        File file = findFile(args[0]);
-        if (file != null) {
-            String fileContent = null;
-            try {
-                fileContent = fileContent(file);
-                PeerMessenger.sendMessageToPeer(
-                        Action.FILE,
-                        localPeer,
-                        senderPeer,
-                        fileContent, "0", "0");
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+        try {
+            FileChunk chunk = fileContent(args[0], Integer.parseInt(args[2]), Integer.parseInt(args[1]));
+            PeerMessenger.sendMessageToPeer(
+                    Action.FILE,
+                    localPeer,
+                    senderPeer,
+                    chunk.getFileName(),
+                    String.valueOf(chunk.getChunkSize()),
+                    String.valueOf(chunk.getChunkIndex()),
+                    chunk.getContent());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -53,8 +53,37 @@ public class DownloadHandler implements MessageHandler {
         return null;
     }
 
-    private String fileContent(File file) throws IOException {
-        byte[] fileContent = Files.readAllBytes(file.toPath());
-        return Base64.getEncoder().encodeToString(fileContent);
+    private FileChunk fileContent(String filename, int chunkIndex, int globalChunkSize) throws IOException {
+        File file = findFile(filename);
+        byte[] bytesFileContent = Files.readAllBytes(file.toPath());
+        System.out.println("DEBUG FILE CONTENT SIZE: " +  bytesFileContent.length);
+
+        //230 bytes, globalchunk = 100; index = 2
+
+        //TODO
+        // 200
+        int chunkStart = chunkIndex * globalChunkSize;
+
+
+        //100
+        int chunkSize = Math.min(globalChunkSize, (bytesFileContent.length - chunkStart));
+
+        FileChunk fileChunk = new FileChunk(
+                filename,
+                chunkIndex,
+                chunkSize,
+                localPeer
+        );
+
+        byte[] chunkContent = new byte[chunkSize];
+
+        for (int i = 0; i < chunkSize; i++) {
+            int bytesIntex = chunkStart + i;
+            chunkContent[i] = bytesFileContent[bytesIntex];
+        }
+
+        String fileContentString =  Base64.getEncoder().encodeToString(chunkContent);
+        fileChunk.setContent(fileContentString);
+        return fileChunk;
     }
 }
