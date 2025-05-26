@@ -25,7 +25,6 @@ public class FileListScreen extends AbstractScreen implements PeerMessageErrorCa
 
     @Override
     protected void showOptions() {
-        System.out.println("DEBUG FILE LIST SCREEN");
         sharedFileListManager.startNewRequest(localPeer.getNeighbours().size());
 
         List<Peer> neighboursPeers = this.localPeer.getNeighbours();
@@ -51,8 +50,7 @@ public class FileListScreen extends AbstractScreen implements PeerMessageErrorCa
                 String option = "[" + (i + 1) + "]";
                 String name = files.get(i).getName();
                 int size = files.get(i).getSize();
-                String address = files.get(i).getPeer();
-                System.out.printf("%-4s %-60s %-10d %-15s\n", option, name, size, address);
+                System.out.printf("%-4s %-60s %-10d %-30s\n", option, name, size, files.get(i).getPeersString());
             }
         }
     }
@@ -66,8 +64,10 @@ public class FileListScreen extends AbstractScreen implements PeerMessageErrorCa
             List<SharableFile> files = sharedFileListManager.getFiles();
             if (index >= 0 && index < files.size()) {
                 SharableFile file = files.get(index);
-                System.out.println("SELECTED " + file.getName() + " " + file.getPeer());
-                Peer peerWithFile = localPeer.findPeerByAddress(file.getPeer());
+                System.out.println("SELECTED " + file.getName() + " " + file.getPeersString());
+                Peer peerWithFile = localPeer.findPeerByAddress(file.getPeers().get(0));
+
+                //TODO Change way on asking and receiving files
                 sharedFileListManager.setFileToDownload(file);
                 PeerMessenger.sendMessageToPeer(
                         Action.DOWNLOAD,

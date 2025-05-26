@@ -2,6 +2,7 @@ import handler.*;
 import dispatcher.MessageDispatcher;
 import model.Action;
 import model.Peer;
+import model.SharedDownloadManager;
 import model.SharedFileListManager;
 import screens.navigation.Navigation;
 import screens.navigation.Route;
@@ -47,7 +48,15 @@ public class Main {
 
         Peer rootPeer = new Peer(address, dispatcher, neighbourPeers);
         SharedFileListManager sharedFileListManager = new SharedFileListManager();
-        Navigation navigation = new Navigation(rootPeer, neighbourPeers, sharedDir, sharedFileListManager);
+        SharedDownloadManager sharedDownloadManager = new SharedDownloadManager();
+
+        Navigation navigation = new Navigation(
+                rootPeer,
+                neighbourPeers,
+                sharedDir,
+                sharedFileListManager,
+                sharedDownloadManager
+        );
 
         dispatcher.register(Action.HELLO, new HelloHandler(rootPeer));
         dispatcher.register(Action.LIST_PEERS, new PeerListHandler(rootPeer));

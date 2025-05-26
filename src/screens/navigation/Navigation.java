@@ -2,14 +2,8 @@ package screens.navigation;
 
 import dispatcher.PeerMessenger;
 import handler.FileHandler;
-import model.Action;
-import model.Peer;
-import model.SharableFile;
-import model.SharedFileListManager;
-import screens.AbstractScreen;
-import screens.DisplayPeersScreen;
-import screens.FileListScreen;
-import screens.InitialScreen;
+import model.*;
+import screens.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,12 +14,20 @@ public class Navigation {
     private final List<Peer> neighboursPeers;
     private final String sharedDir;
     private final SharedFileListManager sharedFileListManager;
+    private final SharedDownloadManager sharedDownloadManager;
 
-    public Navigation(Peer rootPeer, List<Peer> neighboursPeers, String sharedDir, SharedFileListManager sharedFileListManager) {
+    public Navigation(
+            Peer rootPeer,
+            List<Peer> neighboursPeers,
+            String sharedDir,
+            SharedFileListManager sharedFileListManager,
+            SharedDownloadManager sharedDownloadManager
+    ) {
         this.rootPeer = rootPeer;
         this.neighboursPeers = neighboursPeers;
         this.sharedDir = sharedDir;
         this.sharedFileListManager = sharedFileListManager;
+        this.sharedDownloadManager = sharedDownloadManager;
     }
 
     public void navigate(Route route) {
@@ -59,6 +61,7 @@ public class Navigation {
                 break;
 
             case CHANGE_CHUNK:
+                navigateToScreen(new ChangeChunkScreen(this, sharedDownloadManager));
                 System.out.println("Alterando tamanho de chunk...");
                 break;
 

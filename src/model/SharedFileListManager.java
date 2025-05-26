@@ -10,9 +10,9 @@ public class SharedFileListManager {
     private int remainingPeers = 0;
     private SharableFile fileToDownload;
 
-    public void addFilesFromPeer(List<SharableFile> files) {
+    public void addFilesFromPeer(List<SharableFile> files, String peerAddress) {
         synchronized (lock) {
-            this.files.addAll(files);
+            mergeFilesFromPeer(files, peerAddress);
             remainingPeers =  remainingPeers - 1;
             lock.notify();
         }
@@ -44,5 +44,20 @@ public class SharedFileListManager {
 
     public SharableFile getFileToDownload() {
         return fileToDownload;
+    }
+
+    private void mergeFilesFromPeer(List<SharableFile> newFiles, String peerAddress) {
+        for(SharableFile newFile : newFiles) {
+            boolean found = false;
+            for(SharableFile file : files) {
+                if(newFile.equals(file)) {
+                    found = true;
+                    file.getPeers().add(peerAddress);
+                }
+            }
+            if(!found) {
+                files.add(newFile);
+            }
+        }
     }
 }
