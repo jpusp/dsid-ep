@@ -3,7 +3,6 @@ package model;
 import dispatcher.PeerMessenger;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -16,7 +15,10 @@ public class SharedDownloadManager {
     private SharableFile fileToDownload;
     private List<FileChunk> chunksToDownload;
     private List<FileChunk> downloadedChunks;
-    private int globalChunkSize = 3000;
+    private int globalChunkSize = 256;
+    private long requestedAt = 0;
+
+    private List<DownloadStats> stats =  new ArrayList<>();
 
     public SharedDownloadManager(String sharedDir) {
         this.sharedDir = sharedDir;
@@ -40,6 +42,7 @@ public class SharedDownloadManager {
             chunksToDownload.add(new FileChunk(sharableFile.getName(), i, globalChunkSize, peerForChunk(peersWithFile, i)));
         }
 
+        requestedAt = System.currentTimeMillis();
         for (FileChunk chunk : chunksToDownload) {
             PeerMessenger.sendMessageToPeer(
                     Action.DOWNLOAD,
@@ -69,12 +72,14 @@ public class SharedDownloadManager {
         this.globalChunkSize = chunkSize;
     }
 
+    public List<DownloadStats> getStats() {
+        return stats;
+    }
+
     public void addFileChunkPart(FileChunk fileChunk) {
         this.downloadedChunks.add(fileChunk);
-        System.out.println("DEBUG RECEIVED: " + downloadedChunks.size());
 
         if (this.downloadedChunks.size() == this.chunksToDownload.size()) {
-            System.out.println("DEBUG FINIIIIIIISH DOWNLOADING");
             downloadedChunks.sort((o1, o2) -> o1.getChunkIndex() - o2.getChunkIndex());
             List<byte[]> decodedChunks = new ArrayList<>();
             for (FileChunk chunk : downloadedChunks) {
@@ -82,6 +87,12 @@ public class SharedDownloadManager {
             }
 
 
+            long currentTime = System.currentTimeMillis();
+            int duration = Math.toIntExact(currentTime - requestedAt);
+
+
+            addStatistic(globalChunkSize, fileToDownload.getSize(), fileToDownload.getPeers().size(), duration);
+            System.out.println("DEBUG FINIIIIIIISH DOWNLOADING. DURATION: " + duration);
             try (FileOutputStream fos = new FileOutputStream(sharedDir + "/" + fileToDownload.getName())) {
                 for (byte[] parte : decodedChunks) {
                     fos.write(parte);
@@ -98,6 +109,25 @@ public class SharedDownloadManager {
         FileOutputStream fos = new FileOutputStream(file);
         fos.write(fileContent);
         fos.close();
+    }
+
+    private void addStatistic(int chunkSize, int fileSize, int peersSize, int duration) {
+        StringBuilder sbID = new StringBuilder();
+        sbID.append(chunkSize);
+        sbID.append(fileSize);
+        sbID.append(peersSize);
+        DownloadStats downloadStats = null;
+        for (DownloadStats stat : stats) {
+            if (stat.getId().contentEquals(sbID)) {
+                downloadStats = stat;
+                stat.getDurations().add(duration);
+            }
+        }
+        if (downloadStats == null) {
+            downloadStats = new DownloadStats(chunkSize, fileSize, peersSize);
+            downloadStats.getDurations().add(duration);
+            stats.add(downloadStats);
+        }
     }
 
 }

@@ -57,7 +57,7 @@ public class Navigation {
                 break;
 
             case SHOW_STATS:
-                System.out.println("Exibindo estatísticas...");
+                navigateToScreen(new DisplayStatisticsScreen(this, sharedDownloadManager));
                 break;
 
             case CHANGE_CHUNK:
