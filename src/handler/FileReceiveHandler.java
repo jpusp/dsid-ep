@@ -24,21 +24,27 @@ public class FileReceiveHandler implements MessageHandler {
         localPeer.updateClockOnReceive(clock, true);
         localPeer.incrementClock();
 
-        try {
-            File file = fileFromBase64(args[0]);
-            System.out.println("Download do arquivo finalizado.");
-        } catch (IOException e) {
-            System.out.println("FALHA AO SALVAR ARQUIVO");
-            throw new RuntimeException(e);
+        System.out.print("PARTE DO ARQUIVO RECEBIDO." + args);
+        for (String arg : args) {
+            System.out.print(arg + " ");
         }
-    }
+        System.out.println();
 
-    private File fileFromBase64(String encodedFile) throws IOException {
-        byte[] fileContent = Base64.getDecoder().decode(encodedFile);
-        File file = new File(sharedDir + "/" + sharedFileListManager.getFileToDownload().getName());
-        FileOutputStream fos = new FileOutputStream(file);
-        fos.write(fileContent);
-        fos.close();
-        return file;
-    }
+//        try {
+//            File file = fileFromBase64(args[0]);
+            System.out.println("Download do arquivo finalizado.");
+//        } catch (IOException e) {
+//            System.out.println("FALHA AO SALVAR ARQUIVO");
+//            throw new RuntimeException(e);
+        }
+//    }
+
+//    private File fileFromBase64(String encodedFile) throws IOException {
+//        byte[] fileContent = Base64.getDecoder().decode(encodedFile);
+//        File file = new File(sharedDir + "/" + sharedFileListManager.getFileToDownload().getName());
+//        FileOutputStream fos = new FileOutputStream(file);
+//        fos.write(fileContent);
+//        fos.close();
+//        return file;
+//    }
 }

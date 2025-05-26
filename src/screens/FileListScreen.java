@@ -2,10 +2,7 @@ package screens;
 
 import dispatcher.PeerMessageErrorCallback;
 import dispatcher.PeerMessenger;
-import model.Action;
-import model.Peer;
-import model.SharableFile;
-import model.SharedFileListManager;
+import model.*;
 import screens.navigation.Navigation;
 import screens.navigation.Route;
 
@@ -16,11 +13,13 @@ public class FileListScreen extends AbstractScreen implements PeerMessageErrorCa
 
     private final Peer localPeer;
     private final SharedFileListManager sharedFileListManager;
+    private final SharedDownloadManager sharedDownloadManager;
 
-    public FileListScreen(Navigation navigation, Peer localPeer, SharedFileListManager sharedFileListManager) {
+    public FileListScreen(Navigation navigation, Peer localPeer, SharedFileListManager sharedFileListManager, SharedDownloadManager sharedDownloadManager) {
         super(navigation);
         this.localPeer = localPeer;
         this.sharedFileListManager = sharedFileListManager;
+        this.sharedDownloadManager = sharedDownloadManager;
     }
 
     @Override
@@ -65,14 +64,8 @@ public class FileListScreen extends AbstractScreen implements PeerMessageErrorCa
             if (index >= 0 && index < files.size()) {
                 SharableFile file = files.get(index);
                 System.out.println("SELECTED " + file.getName() + " " + file.getPeersString());
-                Peer peerWithFile = localPeer.findPeerByAddress(file.getPeers().get(0));
 
-                //TODO Change way on asking and receiving files
-                sharedFileListManager.setFileToDownload(file);
-                PeerMessenger.sendMessageToPeer(
-                        Action.DOWNLOAD,
-                        localPeer, peerWithFile,
-                        file.getName(), "0", "0");
+                sharedDownloadManager.startDownload(file, localPeer);
                 navigation.navigate(Route.INITIAL);
             } else {
                 System.out.println("INVALID OPTION");

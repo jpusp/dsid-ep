@@ -24,7 +24,7 @@ public class ChangeChunkScreen extends AbstractScreen {
 
     @Override
     protected void onOptionSelected(int option) {
-        this.sharedDownloadManager.setChunkSize(option);
+        this.sharedDownloadManager.setGlobalChunkSize(option);
         System.out.println("Tamanho de chunk alterado: " + option);
         navigation.navigate(Route.INITIAL);
     }

@@ -53,7 +53,7 @@ public class Navigation {
                 break;
 
             case SEARCH_FILES:
-                navigateToScreen(new FileListScreen(this, rootPeer, sharedFileListManager));
+                navigateToScreen(new FileListScreen(this, rootPeer, sharedFileListManager, sharedDownloadManager));
                 break;
 
             case SHOW_STATS:

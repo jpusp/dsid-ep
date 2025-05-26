@@ -8,7 +8,6 @@ public class SharedFileListManager {
     public final Object lock = new Object();
     private final List<SharableFile> files = new ArrayList<>();
     private int remainingPeers = 0;
-    private SharableFile fileToDownload;
 
     public void addFilesFromPeer(List<SharableFile> files, String peerAddress) {
         synchronized (lock) {
@@ -36,14 +35,6 @@ public class SharedFileListManager {
             remainingPeers = remainingPeers - 1;
             lock.notify();
         }
-    }
-
-    public void setFileToDownload(SharableFile file) {
-        this.fileToDownload = file;
-    }
-
-    public SharableFile getFileToDownload() {
-        return fileToDownload;
     }
 
     private void mergeFilesFromPeer(List<SharableFile> newFiles, String peerAddress) {
