@@ -2,7 +2,6 @@ package model;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 public class DownloadStats {
 
@@ -27,17 +26,20 @@ public class DownloadStats {
         this.id = sbID.toString();
     }
 
-    public int getAverageMileseconds() {
+    public double getAverageMilliseconds() {
         int sum = 0;
         for (Integer duration : durations) {
             sum += duration;
         }
-        return  sum / durations.size();
+        return  (sum / (double) durations.size()) / 1000.0;
     }
 
-    public int getDesvpad() {
-//        return desvpad;
-        return 0;
+    public double getStdDeviation() {
+        double average = durations.stream().mapToInt(Integer::intValue).average().orElse(0.0);
+        double sqrSum = durations.stream()
+                .mapToDouble(i -> Math.pow(i - average, 2))
+                .sum();
+        return Math.sqrt(sqrSum / ((double) durations.size()));
     }
 
     public int getSampleSize() {

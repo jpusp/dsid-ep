@@ -19,13 +19,13 @@ public class DisplayStatisticsScreen extends AbstractScreen {
         System.out.printf("%-12s | %-10s | %-20s | %-4s | %-15s | %-15s\n",
                 "Tam. chunk","N Peers", "Tamanho Arquivo", "N", "Tempo Médio", "Desvio Padrão");
         for(DownloadStats stat: sharedDownloadManager.getStats()) {
-            System.out.printf("%-12d | %-10d | %-20d | %-4d | %-15d | %-15d\n",
+            System.out.printf("%-12d | %-10d | %-20d | %-4d | %-15f | %-15f\n",
                     stat.getChunkSize(),
                     stat.getPeersSize(),
                     stat.getFileSize(),
                     stat.getSampleSize(),
-                    stat.getAverageMileseconds(),
-                    stat.getDesvpad()
+                    stat.getAverageMilliseconds(),
+                    stat.getStdDeviation()
             );
         }
         navigation.navigate(Route.INITIAL);

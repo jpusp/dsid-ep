@@ -56,16 +56,7 @@ public class DownloadHandler implements MessageHandler {
     private FileChunk fileContent(String filename, int chunkIndex, int globalChunkSize) throws IOException {
         File file = findFile(filename);
         byte[] bytesFileContent = Files.readAllBytes(file.toPath());
-        System.out.println("DEBUG FILE CONTENT SIZE: " +  bytesFileContent.length);
-
-        //230 bytes, globalchunk = 100; index = 2
-
-        //TODO
-        // 200
         int chunkStart = chunkIndex * globalChunkSize;
-
-
-        //100
         int chunkSize = Math.min(globalChunkSize, (bytesFileContent.length - chunkStart));
 
         FileChunk fileChunk = new FileChunk(

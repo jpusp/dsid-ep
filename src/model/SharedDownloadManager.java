@@ -92,7 +92,6 @@ public class SharedDownloadManager {
 
 
             addStatistic(globalChunkSize, fileToDownload.getSize(), fileToDownload.getPeers().size(), duration);
-            System.out.println("DEBUG FINIIIIIIISH DOWNLOADING. DURATION: " + duration);
             try (FileOutputStream fos = new FileOutputStream(sharedDir + "/" + fileToDownload.getName())) {
                 for (byte[] parte : decodedChunks) {
                     fos.write(parte);
@@ -101,14 +100,6 @@ public class SharedDownloadManager {
                 throw new RuntimeException(e);
             }
         }
-    }
-
-    private void saveFileFromBase64(String encodedFile) throws IOException {
-        byte[] fileContent = Base64.getDecoder().decode(encodedFile);
-        File file = new File(sharedDir + "/" + fileToDownload.getName());
-        FileOutputStream fos = new FileOutputStream(file);
-        fos.write(fileContent);
-        fos.close();
     }
 
     private void addStatistic(int chunkSize, int fileSize, int peersSize, int duration) {
