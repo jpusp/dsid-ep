@@ -27,7 +27,7 @@ public class FileListHandler implements MessageHandler {
                 String[] fileArgs = arg.split(":");
                 files.add(new SharableFile(Integer.parseInt(fileArgs[1]), fileArgs[0], sender));
             }
-            sharedFileListManager.addFilesFromPeer(files);
+            sharedFileListManager.addFilesFromPeer(files, sender);
         } catch (NumberFormatException ignored) {}
     }
 }

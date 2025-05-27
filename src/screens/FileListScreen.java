@@ -2,10 +2,7 @@ package screens;
 
 import dispatcher.PeerMessageErrorCallback;
 import dispatcher.PeerMessenger;
-import model.Action;
-import model.Peer;
-import model.SharableFile;
-import model.SharedFileListManager;
+import model.*;
 import screens.navigation.Navigation;
 import screens.navigation.Route;
 
@@ -16,16 +13,17 @@ public class FileListScreen extends AbstractScreen implements PeerMessageErrorCa
 
     private final Peer localPeer;
     private final SharedFileListManager sharedFileListManager;
+    private final SharedDownloadManager sharedDownloadManager;
 
-    public FileListScreen(Navigation navigation, Peer localPeer, SharedFileListManager sharedFileListManager) {
+    public FileListScreen(Navigation navigation, Peer localPeer, SharedFileListManager sharedFileListManager, SharedDownloadManager sharedDownloadManager) {
         super(navigation);
         this.localPeer = localPeer;
         this.sharedFileListManager = sharedFileListManager;
+        this.sharedDownloadManager = sharedDownloadManager;
     }
 
     @Override
     protected void showOptions() {
-        System.out.println("DEBUG FILE LIST SCREEN");
         sharedFileListManager.startNewRequest(localPeer.getNeighbours().size());
 
         List<Peer> neighboursPeers = this.localPeer.getNeighbours();
@@ -51,8 +49,7 @@ public class FileListScreen extends AbstractScreen implements PeerMessageErrorCa
                 String option = "[" + (i + 1) + "]";
                 String name = files.get(i).getName();
                 int size = files.get(i).getSize();
-                String address = files.get(i).getPeer();
-                System.out.printf("%-4s %-60s %-10d %-15s\n", option, name, size, address);
+                System.out.printf("%-4s %-60s %-10d %-30s\n", option, name, size, files.get(i).getPeersString());
             }
         }
     }
@@ -66,13 +63,9 @@ public class FileListScreen extends AbstractScreen implements PeerMessageErrorCa
             List<SharableFile> files = sharedFileListManager.getFiles();
             if (index >= 0 && index < files.size()) {
                 SharableFile file = files.get(index);
-                System.out.println("SELECTED " + file.getName() + " " + file.getPeer());
-                Peer peerWithFile = localPeer.findPeerByAddress(file.getPeer());
-                sharedFileListManager.setFileToDownload(file);
-                PeerMessenger.sendMessageToPeer(
-                        Action.DOWNLOAD,
-                        localPeer, peerWithFile,
-                        file.getName(), "0", "0");
+                System.out.println("SELECTED " + file.getName() + " " + file.getPeersString());
+
+                sharedDownloadManager.startDownload(file, localPeer);
                 navigation.navigate(Route.INITIAL);
             } else {
                 System.out.println("INVALID OPTION");
