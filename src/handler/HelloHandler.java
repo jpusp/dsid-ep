@@ -16,7 +16,8 @@ public class HelloHandler implements MessageHandler {
 
     @Override
     public void handle(String sender, int clock, String[] args) {
-        localPeer.updateClockOnReceive();
+        localPeer.updateClockOnReceive(clock, true);
+        localPeer.incrementClock();
 
         String[] parts = sender.split(":");
         if (parts.length != 2) return;
@@ -26,12 +27,16 @@ public class HelloHandler implements MessageHandler {
             int port = Integer.parseInt(parts[1]);
             InetSocketAddress address = new InetSocketAddress(ip, port);
 
-            Peer existing = localPeer.findPeerByAddress(address);
-            if (existing != null) {
-                existing.setStatus(PeerStatus.ONLINE);
-                System.out.println("Atualizando peer " + sender + " status ONLINE");
+            Peer senderPeer = localPeer.findPeerByAddress(address);
+            if (senderPeer != null ) {
+                if (clock > senderPeer.getClock()) {
+                    senderPeer.updateClockOnReceive(clock, false);
+                    senderPeer.setStatus(PeerStatus.ONLINE);
+                    System.out.println("Atualizando peer " + sender + " status ONLINE");
+                }
             } else {
                 Peer newPeer = new Peer(address, localPeer.getDispatcher());
+                newPeer.updateClockOnReceive(clock, false);
                 newPeer.setStatus(PeerStatus.ONLINE);
                 localPeer.addNeighbour(newPeer);
                 System.out.println("Adicionando novo peer " + sender + " status ONLINE");

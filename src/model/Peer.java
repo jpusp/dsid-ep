@@ -88,6 +88,24 @@ public class Peer {
         neighbours.add(peer);
     }
 
+    public Peer findPeerByAddress(String address) {
+        String[] parts = address.split(":");
+        if (parts.length != 2) {
+            return null;
+        }
+
+        String ip = parts[0];
+        int port;
+        try {
+            port = Integer.parseInt(parts[1]);
+        } catch (NumberFormatException e) {
+            return null;
+        }
+
+        InetSocketAddress socketAddress = new InetSocketAddress(ip, port);
+        return findPeerByAddress(socketAddress);
+    }
+
     public Peer findPeerByAddress(InetSocketAddress address) {
         for (Peer p : neighbours) {
             if (p.getSocketAddress().equals(address)) {
@@ -106,6 +124,17 @@ public class Peer {
     public synchronized void updateClockOnReceive() {
         clock++;
         System.out.println("=> Atualizando relogio para " + clock);
+    }
+
+    public synchronized int getClock() {
+        return clock;
+    }
+
+    public synchronized void updateClockOnReceive(int clockReceived, boolean verbose) {
+        if (clockReceived > clock) {
+            clock = clockReceived;
+            if (verbose) System.out.println("=> Atualizando relogio para " + clock);
+        }
     }
 
     public PeerStatus getStatus() {
