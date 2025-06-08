@@ -2,6 +2,7 @@ import handler.*;
 import dispatcher.MessageDispatcher;
 import model.Action;
 import model.Peer;
+import model.SharedDownloadManager;
 import model.SharedFileListManager;
 import screens.navigation.Navigation;
 import screens.navigation.Route;
@@ -47,7 +48,15 @@ public class Main {
 
         Peer rootPeer = new Peer(address, dispatcher, neighbourPeers);
         SharedFileListManager sharedFileListManager = new SharedFileListManager();
-        Navigation navigation = new Navigation(rootPeer, neighbourPeers, sharedDir, sharedFileListManager);
+        SharedDownloadManager sharedDownloadManager = new SharedDownloadManager(sharedDir);
+
+        Navigation navigation = new Navigation(
+                rootPeer,
+                neighbourPeers,
+                sharedDir,
+                sharedFileListManager,
+                sharedDownloadManager
+        );
 
         dispatcher.register(Action.HELLO, new HelloHandler(rootPeer));
         dispatcher.register(Action.LIST_PEERS, new PeerListHandler(rootPeer));
@@ -56,7 +65,7 @@ public class Main {
         dispatcher.register(Action.LIST_FILES, new ListFilesHandler(rootPeer, sharedDir));
         dispatcher.register(Action.FILE_LIST, new FileListHandler(rootPeer, sharedFileListManager));
         dispatcher.register(Action.DOWNLOAD, new DownloadHandler(rootPeer, sharedDir));
-        dispatcher.register(Action.FILE, new FileReceiveHandler(rootPeer, sharedDir, sharedFileListManager));
+        dispatcher.register(Action.FILE, new FileReceiveHandler(rootPeer, sharedDir, sharedFileListManager, sharedDownloadManager));
 
         if (isPathValid(sharedDir)) {
             rootPeer.startServer();

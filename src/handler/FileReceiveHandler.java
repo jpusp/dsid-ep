@@ -1,6 +1,8 @@
 package handler;
 
+import model.FileChunk;
 import model.Peer;
+import model.SharedDownloadManager;
 import model.SharedFileListManager;
 
 import java.io.File;
@@ -12,11 +14,13 @@ public class FileReceiveHandler implements MessageHandler {
     private final Peer localPeer;
     private final String sharedDir;
     private final SharedFileListManager sharedFileListManager;
+    private final SharedDownloadManager sharedDownloadManager;
 
-    public FileReceiveHandler(Peer peer, String sharedDir, SharedFileListManager sharedFileListManager) {
+    public FileReceiveHandler(Peer peer, String sharedDir, SharedFileListManager sharedFileListManager, SharedDownloadManager sharedDownloadManager) {
         this.localPeer = peer;
         this.sharedDir = sharedDir;
         this.sharedFileListManager = sharedFileListManager;
+        this.sharedDownloadManager = sharedDownloadManager;
     }
 
     @Override
@@ -24,21 +28,13 @@ public class FileReceiveHandler implements MessageHandler {
         localPeer.updateClockOnReceive(clock, true);
         localPeer.incrementClock();
 
-        try {
-            File file = fileFromBase64(args[0]);
-            System.out.println("Download do arquivo finalizado.");
-        } catch (IOException e) {
-            System.out.println("FALHA AO SALVAR ARQUIVO");
-            throw new RuntimeException(e);
-        }
-    }
-
-    private File fileFromBase64(String encodedFile) throws IOException {
-        byte[] fileContent = Base64.getDecoder().decode(encodedFile);
-        File file = new File(sharedDir + "/" + sharedFileListManager.getFileToDownload().getName());
-        FileOutputStream fos = new FileOutputStream(file);
-        fos.write(fileContent);
-        fos.close();
-        return file;
+        FileChunk chunk = new FileChunk(
+                args[0],
+                Integer.parseInt(args[2]),
+                Integer.parseInt(args[1]),
+                localPeer.findPeerByAddress(sender)
+        );
+        chunk.setContent(args[3]);
+        sharedDownloadManager.addFileChunkPart(chunk);
     }
 }
