@@ -41,7 +41,10 @@ public class Peer {
     public void startServer() {
         new Thread(() -> {
             try {
-                serverSocket = new ServerSocket(socketAddress.getPort(), 50, socketAddress.getAddress());
+                serverSocket = new ServerSocket();
+                serverSocket.setReuseAddress(true);
+                serverSocket.bind(new InetSocketAddress(socketAddress.getAddress(), socketAddress.getPort()));
+
 
                 while (running) {
                     Socket socket = serverSocket.accept();
