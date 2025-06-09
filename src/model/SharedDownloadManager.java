@@ -7,6 +7,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.List;
 
 public class SharedDownloadManager {
@@ -26,8 +27,8 @@ public class SharedDownloadManager {
 
     public void startDownload(SharableFile sharableFile, Peer localPeer) {
         this.fileToDownload = sharableFile;
-        this.chunksToDownload = new ArrayList<>();
-        this.downloadedChunks = new ArrayList<>();
+        this.chunksToDownload = Collections.synchronizedList(new ArrayList<>());
+        this.downloadedChunks = Collections.synchronizedList(new ArrayList<>());
 
         int numberOfChunks = sharableFile.getSize()/globalChunkSize;
         if (sharableFile.getSize() % globalChunkSize > 0) {
@@ -50,7 +51,15 @@ public class SharedDownloadManager {
                     chunk.getPeerWithFile(),
                     sharableFile.getName(),
                     String.valueOf(chunk.getChunkSize()),
-                    String.valueOf(chunk.getChunkIndex()));
+                    String.valueOf(chunk.getChunkIndex())
+            );
+
+
+            try {
+                Thread.sleep(5);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
         }
 
 
@@ -76,7 +85,7 @@ public class SharedDownloadManager {
         return stats;
     }
 
-    public void addFileChunkPart(FileChunk fileChunk) {
+    public synchronized void addFileChunkPart(FileChunk fileChunk) {
         this.downloadedChunks.add(fileChunk);
 
         if (this.downloadedChunks.size() == this.chunksToDownload.size()) {

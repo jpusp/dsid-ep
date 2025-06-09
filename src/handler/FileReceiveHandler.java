@@ -25,16 +25,29 @@ public class FileReceiveHandler implements MessageHandler {
 
     @Override
     public void handle(String sender, int clock, String[] args) {
-        localPeer.updateClockOnReceive(clock, true);
-        localPeer.incrementClock();
+        try {
+            localPeer.updateClockOnReceive(clock, true);
+            localPeer.incrementClock();
 
-        FileChunk chunk = new FileChunk(
-                args[0],
-                Integer.parseInt(args[2]),
-                Integer.parseInt(args[1]),
-                localPeer.findPeerByAddress(sender)
-        );
-        chunk.setContent(args[3]);
-        sharedDownloadManager.addFileChunkPart(chunk);
+            String fileName = args[0];
+            int chunkSize = Integer.parseInt(args[1]);
+            int chunkIndex = Integer.parseInt(args[2]);
+            String base64Content = args[3];
+
+            Peer senderPeer = localPeer.findPeerByAddress(sender);
+            if (senderPeer == null) {
+                System.err.println("Sender peer not found: " + sender);
+                return;
+            }
+
+            FileChunk chunk = new FileChunk(fileName, chunkIndex, chunkSize, senderPeer);
+            chunk.setContent(base64Content);
+
+            sharedDownloadManager.addFileChunkPart(chunk);
+
+        } catch (Exception e) {
+            System.err.println("Erro ao processar mensagem FILE de " + sender + ": " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 }

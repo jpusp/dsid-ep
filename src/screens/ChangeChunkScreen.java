@@ -1,12 +1,8 @@
 package screens;
 
-import dispatcher.PeerMessageErrorCallback;
-import dispatcher.PeerMessenger;
-import model.*;
+import model.SharedDownloadManager;
 import screens.navigation.Navigation;
 import screens.navigation.Route;
-
-import java.util.List;
 
 public class ChangeChunkScreen extends AbstractScreen {
 
