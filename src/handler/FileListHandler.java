@@ -5,6 +5,8 @@ import model.SharableFile;
 import model.SharedFileListManager;
 
 import java.net.InetSocketAddress;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
 public class FileListHandler implements MessageHandler {
@@ -25,7 +27,10 @@ public class FileListHandler implements MessageHandler {
             ArrayList<SharableFile> files = new ArrayList<>();
             for (String arg: args) {
                 String[] fileArgs = arg.split(":");
-                files.add(new SharableFile(Integer.parseInt(fileArgs[1]), fileArgs[0], sender));
+                String fileName = URLDecoder.decode(fileArgs[0], StandardCharsets.UTF_8);
+                int fileSize = Integer.parseInt(fileArgs[1]);
+
+                files.add(new SharableFile(fileSize, fileName, sender));
             }
             sharedFileListManager.addFilesFromPeer(files, sender);
         } catch (NumberFormatException ignored) {}

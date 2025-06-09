@@ -7,6 +7,8 @@ import model.PeerStatus;
 
 import java.io.File;
 import java.net.InetSocketAddress;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,7 +38,10 @@ public class ListFilesHandler implements MessageHandler {
             File[] files = FileHandler.listLocalFiles(sharedDirectory);
             List<String> msgArgs = new ArrayList<>();
             for (File file : files) {
-                msgArgs.add(file.getName() + ":" + file.length());
+                String encodedFileName = URLEncoder.encode(file.getName(), StandardCharsets.UTF_8)
+                        .replace("+", "%20");
+
+                msgArgs.add(encodedFileName + ":" + file.length());
             }
 
             PeerMessenger.sendMessageToPeer(
