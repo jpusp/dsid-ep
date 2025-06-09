@@ -2,10 +2,12 @@ package screens.navigation;
 
 import dispatcher.PeerMessenger;
 import handler.FileHandler;
-import model.*;
+import model.Action;
+import model.Peer;
+import model.SharedDownloadManager;
+import model.SharedFileListManager;
 import screens.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class Navigation {
@@ -72,6 +74,7 @@ public class Navigation {
 
             default:
                 System.out.println("Comando inválido.");
+                navigate(Route.INITIAL);
                 break;
         }
     }
